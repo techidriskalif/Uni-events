@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IUK · Event Registration System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #1e293b;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 2000;
+            background: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background: #016b8c;
+            transition: 0.3s;
+        }
+
+        .top-nav {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.8rem 2rem;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, #016b8c, #0f5147);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #016b8c;
+        }
+
+        .logo-text small {
+            display: block;
+            font-size: 0.7rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #016b8c;
+            color: white;
+        }
+
+        .login-btn {
+            background: #016b8c;
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #e6f0fa;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+        }
+
+        .logout-header-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 0.3rem 0.8rem;
+            border-radius: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .top-nav {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                width: 280px;
+                height: 100vh;
+                transition: 0.3s;
+                padding: 5rem 1.5rem;
+                z-index: 1500;
+                overflow-y: auto;
+            }
+
+            .top-nav.active {
+                left: 0;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+
+            .nav-link {
+                width: 100%;
+                padding: 0.8rem 1rem;
+            }
+
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1400;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+            min-height: calc(100vh - 70px);
+            padding-top: 20px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            max-width: 450px;
+            width: 90%;
+            padding: 2rem;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #016b8c;
+            outline: none;
+        }
+
+        .login-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #016b8c, #0f5147);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-header {
+            background: white;
+            border-radius: 30px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-badge {
+            background: #e6f0fa;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            color: #016b8c;
+        }
+
+        .logout-dashboard-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .user-registration-card {
+            background: white;
+            border-radius: 30px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .registration-details {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .detail-item {
+            padding: 0.8rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .success-message-box {
+            background: #d1fae5;
+            border-radius: 20px;
+            padding: 1.2rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25D366;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 0 1rem;
+                margin-top: 4rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <nav class="top-nav" id="topNav">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-mosque"></i></div>
+                <div class="logo-text">IUK <small>Islamic University of Kenya</small></div>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link" data-page="register"><i class="fas fa-pen-to-square"></i> Register</a>
+                <a class="nav-link" data-page="contact"><i class="fas fa-envelope"></i> Contact</a>
+                <div id="authSection">
+                    <a class="nav-link login-btn" id="loginNavBtn"><i class="fas fa-user"></i> Login</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="home-page" class="page active">
+        <div style="max-width: 1200px; margin: 2rem auto; padding: 1.5rem;">
+            <div style="text-align: center;">
+                <img src="Logo iuk.jpg" alt="Not Found" height="200px" width="150px">
+                <div class="arabic" style="font-size:1.8rem; color:#016b8c;">الجامعة الإسلامية في كينيا</div>
+                <div style="font-size:1.8rem; font-weight:800; color:#0a3e55;">ISLAMIC UNIVERSITY OF KENYA</div>
+                <div
+                    style="background:#e6f0fa; color:#016b8c; padding:0.4rem 1.2rem; border-radius:40px; display:inline-block; margin:1rem 0;">
+                    Kisaju Campus · Nairobi-Namanga Highway</div>
+                <h1 style="font-size:2.5rem;">Ethics · Research · Quality</h1>
+                <div style="display:flex; gap:10px; justify-content:center; margin:1rem 0;">
+                    <span style="background:#dcf0ff; padding:0.4rem 1rem; border-radius:40px;">Ethics</span>
+                    <span style="background:#dcf0ff; padding:0.4rem 1rem; border-radius:40px;">Research</span>
+                    <span style="background:#dcf0ff; padding:0.4rem 1rem; border-radius:40px;">Quality</span>
+                </div>
+                <p>Welcome to the Islamic University of Kenya event registration portal.</p>
+                <a class="nav-link" data-page="register"
+                    style="display:inline-flex; margin-top:1.5rem; background:#016b8c; color:white; padding:0.8rem 1.5rem; border-radius:40px; text-decoration:none;"><i
+                        class="fas fa-arrow-right"></i> Register Now</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="register-page" class="page">
+        <div style="max-width:800px; margin:2rem auto; padding:0 1.5rem;">
+            <div style="background:white; border-radius:30px; padding:2rem;">
+                <h2 style="margin-bottom:1.5rem; color:#016b8c;"><i class="fas fa-pen-alt"></i> Event Registration</h2>
+                <form id="registrationForm">
+                    <div style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+                        <div style="flex:1;"><label>Full Name *</label><input type="text" id="regFullName"
+                                style="width:100%; padding:0.8rem; border-radius:50px; border:2px solid #e2e8f0;"
+                                required></div>
+                        <div style="flex:1;"><label>Email *</label><input type="email" id="regEmail"
+                                style="width:100%; padding:0.8rem; border-radius:50px; border:2px solid #e2e8f0;"
+                                required></div>
+                    </div>
+                    <div style="margin-bottom:1rem;">
+                        <label>Password *</label>
+                        <input type="password" id="regPassword"
+                            style="width:100%; padding:0.8rem; border-radius:50px; border:2px solid #e2e8f0;" required>
+                    </div>
+                    <div style="margin-bottom:1rem;"><label>Phone Number *</label><input type="tel" id="regPhone"
+                            value="+254"
+                            style="width:100%; padding:0.8rem; border-radius:50px; border:2px solid #e2e8f0;" required>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+                        <div style="flex:1;"><label>Event *</label>
+                            <select id="regEvent"
+                                style="width:100%; padding:0.8rem; border-radius:50px; border:2px solid #e2e8f0;">
+                                <option value="">Select Event</option>
+                                <option value="Graduation ceremony">🎓 Graduation (KSh 2,500)</option>
+                                <option value="Football Team">⚽ Football Team (KSh 1,000)</option>
+                                <option value="Voter Registration">🗳️ Voter Registration (Free)</option>
+                            </select>
+                        </div>
+                        <div style="flex:1;"><label>Tickets</label><input type="number" id="regTickets" value="1"
+                                min="1" max="10"
+                                style="width:100%; padding:0.8rem; border-radius:50px; border:2px solid #e2e8f0;"></div>
+                    </div>
+                    <div style="background:#f8fafc; border-radius:25px; padding:1rem; margin-bottom:1rem;">
+                        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                            <label style="background:white; padding:0.5rem 1rem; border-radius:40px;"><input
+                                    type="radio" name="paymentMethod" value="M-PESA" checked> M-PESA</label>
+                            <label style="background:white; padding:0.5rem 1rem; border-radius:40px;"><input
+                                    type="radio" name="paymentMethod" value="Card"> Card</label>
+                            <label style="background:white; padding:0.5rem 1rem; border-radius:40px;"><input
+                                    type="radio" name="paymentMethod" value="Bank"> Bank</label>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        style="width:100%; padding:1rem; background:linear-gradient(135deg,#016b8c,#0f5147); color:white; border:none; border-radius:60px; font-weight:700;"><i
+                            class="fas fa-check-circle"></i> Submit Registration</button>
+                </form>
+                <div id="regSuccessMsg" style="display:none; margin-top:1rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-page" class="page">
+        <div style="max-width:600px; margin:2rem auto; padding:0 1.5rem;">
+            <div style="background:white; border-radius:30px; padding:2rem; text-align:center;">
+                <div
+                    style="width:80px; height:80px; background:linear-gradient(135deg,#016b8c,#0f5147); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
+                    <i class="fas fa-mosque" style="font-size:2.5rem; color:white;"></i></div>
+                <h2>Islamic University of Kenya</h2>
+                <p style="color:#64748b;">Kitengela · Nairobi-Namanga Highway</p>
+                <div style="margin-top:1.5rem;">
+                    <p><i class="fas fa-phone"></i> +254 786 618203</p>
+                    <p><i class="fas fa-envelope"></i> info@iuk.ac.ke</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Kitengela, Kajiado County, Kenya</p>
+                </div>
+                <a href="https://wa.me/254786618203" target="_blank"
+                    style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#25D366; color:white; padding:0.8rem 1.5rem; border-radius:40px; text-decoration:none; margin-top:1.5rem;"><i
+                        class="fab fa-whatsapp"></i> Chat on WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="user-dashboard-page" class="page">
+        <div class="dashboard-container">
+            <div id="userDashboardContent"></div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-lock"></i> User Login</h3>
+                <button class="modal-close" id="modalCloseBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="input-group"><label>Email Address</label><input type="email" id="userEmail"
+                    placeholder="student@iuk.ac.ke"></div>
+            <div class="input-group"><label>Password</label><input type="password" id="userPassword"
+                    placeholder="Enter your password"></div>
+            <button class="login-submit" id="userLoginBtn">Login to Dashboard</button>
+        </div>
+    </div>
+
+    <a href="https://wa.me/254786618203" target="_blank" class="whatsapp-float"><i class="fab fa-whatsapp"></i> Need
+        Help?</a>
+
+    <footer style="text-align:center; padding:2rem; color:#64748b; border-top:1px solid #eef2f6; margin-top:2rem;">
+        <i class="fas fa-mosque"></i> Islamic University of Kenya — Kisaju Campus
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv3pDUzjFsJMOGdF2Em8Ty7Id_c8OshRc",
+            authDomain: "event-registration-26c6b.firebaseapp.com",
+            databaseURL: "https://event-registration-26c6b-default-rtdb.firebaseio.com",
+            projectId: "event-registration-26c6b",
+            storageBucket: "event-registration-26c6b.firebasestorage.app",
+            messagingSenderId: "772653295626",
+            appId: "1:772653295626:web:6164b814cdbdcf97ee97f3",
+            measurementId: "G-MM0B9RBT24"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const registrationsRef = collection(db, 'registrations');
+
+        let currentUser = null;
+
+        // Hamburger Menu Functionality
+        const hamburger = document.getElementById('hamburger');
+        const topNav = document.getElementById('topNav');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            topNav.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = topNav.classList.contains('active') ? 'hidden' : '';
+        }
+
+        if (hamburger) hamburger.addEventListener('click', toggleMenu);
+        if (overlay) overlay.addEventListener('click', toggleMenu);
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    topNav.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        function showPage(pageId) {
+            const pages = ['home-page', 'register-page', 'contact-page', 'user-dashboard-page'];
+            pages.forEach(p => {
+                const el = document.getElementById(p);
+                if (el) el.classList.remove('active');
+            });
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-page') === pageId.replace('-page', '')) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        function updateAuthUI() {
+            const authSection = document.getElementById('authSection');
+            const navLinks = document.getElementById('navLinks');
+            if (!authSection) return;
+
+            const existingDashboard = document.getElementById('dashboardNavLink');
+            if (existingDashboard) existingDashboard.remove();
+
+            if (currentUser) {
+                authSection.innerHTML = `<div class="user-info"><i class="fas fa-user-check"></i><span>${escapeHtml(currentUser.fullName || 'User')}</span><button class="logout-header-btn" onclick="logout()">Logout</button></div>`;
+                const dashboardLink = document.createElement('a');
+                dashboardLink.id = 'dashboardNavLink';
+                dashboardLink.className = 'nav-link';
+                dashboardLink.innerHTML = '<i class="fas fa-tachometer-alt"></i> My Dashboard';
+                dashboardLink.onclick = () => showUserDashboard();
+                navLinks.insertBefore(dashboardLink, authSection);
+            } else {
+                authSection.innerHTML = `<a class="nav-link login-btn" id="loginNavBtn"><i class="fas fa-user"></i> Login</a>`;
+                const loginBtn = document.getElementById('loginNavBtn');
+                if (loginBtn) {
+                    loginBtn.onclick = () => {
+                        document.getElementById('loginModal').classList.add('active');
+                    };
+                }
+            }
+        }
+
+        function showUserDashboard() {
+            if (!currentUser) return;
+            const prices = { 'Graduation ceremony': 2500, 'Football Team': 1000, 'Voter Registration': 0 };
+            const content = document.getElementById('userDashboardContent');
+            if (content) {
+                content.innerHTML = `
+                    <div class="dashboard-header">
+                        <div><h2><i class="fas fa-user-circle"></i> My Dashboard</h2><div class="welcome-badge">Welcome, ${escapeHtml(currentUser.fullName)}!</div></div>
+                        <button class="logout-dashboard-btn" onclick="logout()">Logout</button>
+                    </div>
+                    <div class="user-registration-card">
+                        <h3>Your Registration Details</h3>
+                        <div class="registration-details">
+                            <div class="detail-item"><strong>Registration ID:</strong> <code>${currentUser.id}</code></div>
+                            <div class="detail-item"><strong>Full Name:</strong> ${escapeHtml(currentUser.fullName)}</div>
+                            <div class="detail-item"><strong>Email:</strong> ${escapeHtml(currentUser.email)}</div>
+                            <div class="detail-item"><strong>Phone:</strong> ${escapeHtml(currentUser.phone)}</div>
+                            <div class="detail-item"><strong>Event:</strong> ${escapeHtml(currentUser.event)}</div>
+                            <div class="detail-item"><strong>Tickets:</strong> ${currentUser.tickets}</div>
+                            <div class="detail-item"><strong>Total Amount:</strong> <strong>KSh ${(prices[currentUser.event] * currentUser.tickets || 0).toLocaleString()}</strong></div>
+                            <div class="detail-item"><strong>Payment Method:</strong> ${escapeHtml(currentUser.paymentMethod)}</div>
+                            <div class="detail-item"><strong>Payment Status:</strong> <span class="status-badge">Completed</span></div>
+                            <div class="detail-item"><strong>Registration Date:</strong> ${currentUser.createdAtISO ? new Date(currentUser.createdAtISO).toLocaleString() : 'Just now'}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            showPage('user-dashboard-page');
+        }
+
+        window.userLogin = async () => {
+            const email = document.getElementById('userEmail').value.trim();
+            const password = document.getElementById('userPassword').value.trim();
+
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+
+            try {
+                const q = query(registrationsRef, where('email', '==', email));
+                const snapshot = await getDocs(q);
+                let found = null;
+                snapshot.forEach(doc => {
+                    if (doc.data().password === password) {
+                        found = { id: doc.id, ...doc.data() };
+                    }
+                });
+
+                if (found) {
+                    currentUser = found;
+                    document.getElementById('loginModal').classList.remove('active');
+                    updateAuthUI();
+                    showUserDashboard();
+                } else {
+                    alert('Invalid email or password. Please check your credentials.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Error connecting to database: ' + error.message);
+            }
+        };
+
+        document.getElementById('userLoginBtn').onclick = () => userLogin();
+        document.getElementById('modalCloseBtn').onclick = () => {
+            document.getElementById('loginModal').classList.remove('active');
+        };
+
+        window.onclick = (event) => {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                modal.classList.remove('active');
+            }
+        };
+
+        window.logout = () => {
+            currentUser = null;
+            updateAuthUI();
+            showPage('home-page');
+            alert('Logged out successfully');
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+        }
+
+        document.getElementById('registrationForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const pwd = document.getElementById('regPassword').value;
+            if (pwd.length < 4) { alert('Password must be at least 4 characters'); return; }
+
+            const prices = { 'Graduation ceremony': 2500, 'Football Team': 1000, 'Voter Registration': 0 };
+            const total = prices[document.getElementById('regEvent').value] * parseInt(document.getElementById('regTickets').value);
+
+            try {
+                await addDoc(registrationsRef, {
+                    fullName: document.getElementById('regFullName').value,
+                    email: document.getElementById('regEmail').value,
+                    password: pwd,
+                    phone: document.getElementById('regPhone').value,
+                    event: document.getElementById('regEvent').value,
+                    tickets: parseInt(document.getElementById('regTickets').value),
+                    totalAmount: total,
+                    paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value,
+                    paymentStatus: 'completed',
+                    createdAt: serverTimestamp(),
+                    createdAtISO: new Date().toISOString()
+                });
+
+                const msg = document.getElementById('regSuccessMsg');
+                msg.style.display = 'block';
+                msg.innerHTML = `<div class="success-message-box"><i class="fas fa-check-circle"></i><h3>Registration Successful!</h3><p>You can now login with your email and password.</p><button onclick="document.getElementById('loginModal').classList.add('active'); this.parentElement.parentElement.style.display='none';" style="background:#016b8c; color:white; border:none; padding:0.5rem 1rem; border-radius:40px; cursor:pointer;">Go to Login</button></div>`;
+                document.getElementById('registrationForm').reset();
+                document.getElementById('regPhone').value = '+254';
+                setTimeout(() => msg.style.display = 'none', 8000);
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Error saving registration: ' + error.message);
+            }
+        });
+
+        document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+            link.onclick = (e) => {
+                e.preventDefault();
+                const page = link.getAttribute('data-page');
+                if (page === 'home') showPage('home-page');
+                else if (page === 'register') showPage('register-page');
+                else if (page === 'contact') showPage('contact-page');
+            };
+        });
+
+        updateAuthUI();
+        showPage('home-page');
+    </script>
+</body>
+
+</html>
