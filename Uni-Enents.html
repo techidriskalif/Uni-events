@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UniPortal | Islamic University of Kenya - Event Hub</title>
+    <!-- Chart.js CDN for admin bar chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f4f7fc;
+            color: #1e2a3e;
+        }
+
+        :root {
+            --navy: #0a2540;
+            --deep-blue: #1a4972;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --white: #ffffff;
+            --gray-light: #eef2f5;
+            --gray-border: #cfdfed;
+            --success: #2c7a4d;
+            --warning: #c97e0e;
+            --danger: #c73a2b;
+            --info: #2c6e9e;
+        }
+
+        .navbar {
+            background: var(--navy);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .logo h2 {
+            font-weight: 700;
+            font-size: 1.6rem;
+            letter-spacing: -0.5px;
+        }
+        .logo span {
+            color: var(--gold);
+        }
+        .uni-badge {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.8rem;
+            align-items: center;
+        }
+        .nav-link {
+            background: none;
+            border: none;
+            color: #f0f4f8;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            transition: 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+        .logout-btn {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: var(--gold);
+            color: var(--navy);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 1.8rem;
+            margin-top: 1.8rem;
+        }
+        .event-card {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            border: 1px solid var(--gray-border);
+            cursor: pointer;
+        }
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -12px rgba(0,0,0,0.15);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+        }
+        .event-category {
+            background: var(--gray-light);
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--deep-blue);
+        }
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+        }
+        .status-open { background: #e0f3e8; color: var(--success); }
+        .status-closing { background: #fff0db; color: var(--warning); }
+        .status-full { background: #ffe6e3; color: var(--danger); }
+        .event-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0.5rem 0 0.4rem;
+            color: var(--navy);
+        }
+        .event-detail-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #2c4c6e;
+            margin: 0.4rem 0;
+        }
+        .seats {
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .btn-reg {
+            background: var(--deep-blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 40px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-reg:hover {
+            background: var(--navy);
+            transform: scale(0.98);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--deep-blue);
+            color: var(--deep-blue);
+        }
+        .btn-outline:hover {
+            background: var(--deep-blue);
+            color: white;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.8rem;
+        }
+        .search-box {
+            flex: 2;
+            min-width: 200px;
+            display: flex;
+            background: white;
+            border-radius: 60px;
+            border: 1px solid var(--gray-border);
+            padding: 0.4rem 1rem;
+            align-items: center;
+        }
+        .search-box i {
+            color: #6c8eae;
+        }
+        .search-box input {
+            border: none;
+            padding: 0.7rem;
+            width: 100%;
+            outline: none;
+            font-size: 0.9rem;
+        }
+        .category-filter {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .filter-chip {
+            background: white;
+            border: 1px solid var(--gray-border);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-chip.active, .filter-chip:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--navy);
+        }
+        .detail-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        .venue-map-placeholder {
+            background: #e9edf2;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+            border: 1px dashed #8ba5bc;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--gray-border);
+            font-size: 0.95rem;
+        }
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.75rem;
+            margin-top: 0.2rem;
+        }
+        .toast-notify {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--navy);
+            color: white;
+            padding: 0.9rem 1.5rem;
+            border-radius: 40px;
+            box-shadow: 0 10px 18px rgba(0,0,0,0.2);
+            z-index: 2000;
+            font-weight: 500;
+            border-left: 5px solid var(--gold);
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px);}
+            to { opacity: 1; transform: translateX(0);}
+        }
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .recent-table {
+            background: white;
+            border-radius: 1rem;
+            overflow-x: auto;
+            padding: 0.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-border);
+        }
+        .btn-export, .btn-admin-action {
+            background: var(--deep-blue);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 2rem;
+            margin-top: 1rem;
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+        .btn-danger {
+            background: var(--danger);
+        }
+        .btn-warning {
+            background: var(--warning);
+        }
+        .admin-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .admin-section h3 {
+            border-left: 4px solid var(--gold);
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .inline-form {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .inline-form .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin: 0 4px;
+        }
+        .icon-btn.edit { color: var(--info); }
+        .icon-btn.delete { color: var(--danger); }
+        .back-link {
+            background: none;
+            border: none;
+            color: var(--deep-blue);
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 420px;
+            width: 90%;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        }
+        .login-input {
+            margin: 1rem 0;
+        }
+        .login-btn {
+            background: var(--deep-blue);
+            color: white;
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 40px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 0.8rem; }
+            .nav-links { width: 100%; justify-content: center; }
+        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="logo">
+        <h2>Uni<span>Portal</span></h2>
+        <div class="uni-badge"><i class="fas fa-university"></i> Islamic University of Kenya</div>
+    </div>
+    <div class="nav-links">
+        <button class="nav-link active" data-page="home"><i class="fas fa-calendar-alt"></i> Events</button>
+        <button class="nav-link" data-page="admin" id="adminNavBtn"><i class="fas fa-chart-line"></i> Admin</button>
+        <button class="logout-btn" id="logoutBtn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</div>
+<div id="app-root" class="container"></div>
+
+<script>
+    // ---------- AUTHENTICATION STATE ----------
+    let isAdminLoggedIn = false;
+    
+    // ---------- DEFAULT ADMIN CREDENTIALS (HARDCODED FOR RELIABILITY) ----------
+    const DEFAULT_ADMIN_EMAIL = "admin@iuk.ac.ke";
+    const DEFAULT_ADMIN_PASSWORD = "admin123";
+    
+    // ---------- MOCK EVENTS ----------
+    let eventsData = [
+        { id: "ev1", name: "AI in Medicine Symposium", date: "May 12, 2026", time: "10:00 AM - 4:00 PM", location: "Biomedical Hall", category: "Conference", seatsTotal: 120, seatsLeft: 34, status: "Open", description: "Explore breakthrough AI applications in diagnostics, imaging, and patient care. Keynote by Dr. Emily Zhang.", speaker: "Dr. Emily Zhang, Prof. Alan Turing Institute", agenda: "10:00 Keynote, 11:30 Panel, 1:00 Workshops", venueMap: "Main Auditorium, Building B" },
+        { id: "ev2", name: "Annual Sports Gala", date: "June 5, 2026", time: "9:00 AM - 7:00 PM", location: "University Sports Complex", category: "Sports", seatsTotal: 500, seatsLeft: 98, status: "Closing Soon", description: "Inter-department tournaments: football, basketball, athletics.", speaker: "Sports Directorate", agenda: "Opening ceremony 9AM, matches from 10AM.", venueMap: "Outdoor field & Indoor courts" },
+        { id: "ev3", name: "Hackathon 2025", date: "April 28-30, 2026", time: "All Day", location: "Innovation Hub", category: "Workshop", seatsTotal: 80, seatsLeft: 12, status: "Closing Soon", description: "48-hour coding challenge.", speaker: "Tech Club", agenda: "Day1 ideation, Day2 coding", venueMap: "Innovation Hall" },
+        { id: "ev4", name: "Cultural Night", date: "May 20, 2026", time: "6:00 PM - 11:00 PM", location: "Performing Arts Center", category: "Cultural", seatsTotal: 300, seatsLeft: 210, status: "Open", description: "Dance, drama, music performances.", speaker: "Cultural Committee", agenda: "6pm Dance, 7:30 Skits", venueMap: "Amphitheater" },
+        { id: "ev5", name: "Leadership Workshop", date: "April 15, 2026", time: "1:00 PM - 5:00 PM", location: "Business School", category: "Academic", seatsTotal: 40, seatsLeft: 0, status: "Full", description: "Develop leadership skills.", speaker: "Dean's Office", agenda: "Group activities", venueMap: "Room 201" },
+        { id: "ev6", name: "Quantum Computing Seminar", date: "May 2, 2026", time: "2:00PM-5PM", location: "Physics Hall", category: "Academic", seatsTotal: 60, seatsLeft: 45, status: "Open", description: "Intro to quantum algorithms.", speaker: "Dr. Olivia Chen", agenda: "Theory + demo", venueMap: "Physics Building" }
+    ];
+
+    // Users array for admin user management (includes default admin)
+    let systemUsers = [
+        { id: "u1", name: "Admin User", email: DEFAULT_ADMIN_EMAIL, role: "admin", studentId: "ADMIN001", password: DEFAULT_ADMIN_PASSWORD },
+        { id: "u2", name: "Student Rep", email: "student@iuk.ac.ke", role: "student", studentId: "STU2024", password: "student123" }
+    ];
+
+    let registrations = []; 
+    let nextRegId = 100;
+    let nextUserId = 10;
+    let nextEventId = 10;
+
+    // Load data from localStorage
+    function loadData() {
+        const storedReg = localStorage.getItem("uniEventRegistrations");
+        if (storedReg) registrations = JSON.parse(storedReg);
+        else registrations = [
+            { id: 1, studentName: "Alice Johnson", studentId: "S12345", email: "alice@uni.edu", phone: "555-0101", faculty: "Engineering", year: "2nd Year", eventId: "ev1", eventName: "AI in Medicine Symposium", registeredAt: "2026-03-20" },
+            { id: 2, studentName: "Brian Kim", studentId: "S22334", email: "brian@uni.edu", phone: "555-0102", faculty: "Business", year: "3rd Year", eventId: "ev3", eventName: "Hackathon 2025", registeredAt: "2026-03-21" }
+        ];
+        nextRegId = registrations.length > 0 ? Math.max(...registrations.map(r=>r.id), 99) + 1 : 100;
+        
+        const storedEvents = localStorage.getItem("uniEvents");
+        if (storedEvents) eventsData = JSON.parse(storedEvents);
+        else saveEventsToLocal();
+        
+        const storedUsers = localStorage.getItem("uniSystemUsers");
+        if (storedUsers) {
+            systemUsers = JSON.parse(storedUsers);
+            // Ensure default admin exists in loaded data
+            const defaultAdminExists = systemUsers.some(u => u.email === DEFAULT_ADMIN_EMAIL && u.role === "admin");
+            if (!defaultAdminExists) {
+                systemUsers.push({ id: "u1", name: "Admin User", email: DEFAULT_ADMIN_EMAIL, role: "admin", studentId: "ADMIN001", password: DEFAULT_ADMIN_PASSWORD });
+            }
+        } else {
+            saveUsersToLocal();
+        }
+        
+        nextEventId = eventsData.length > 0 ? Math.max(...eventsData.map(e=> parseInt(e.id.replace('ev','')) || 0), 6) + 1 : 10;
+        nextUserId = systemUsers.length > 0 ? Math.max(...systemUsers.map(u=> parseInt(u.id.replace('u','')) || 0), 2) + 1 : 10;
+        
+        recalcSeatsFromRegistrations();
+    }
+
+    function saveRegistrations() { localStorage.setItem("uniEventRegistrations", JSON.stringify(registrations)); recalcSeatsFromRegistrations(); }
+    function saveEventsToLocal() { localStorage.setItem("uniEvents", JSON.stringify(eventsData)); }
+    function saveUsersToLocal() { localStorage.setItem("uniSystemUsers", JSON.stringify(systemUsers)); }
+    
+    function recalcSeatsFromRegistrations() {
+        const regCount = {};
+        registrations.forEach(reg => { regCount[reg.eventId] = (regCount[reg.eventId] || 0) + 1; });
+        eventsData.forEach(ev => {
+            const taken = regCount[ev.id] || 0;
+            const left = ev.seatsTotal - taken;
+            ev.seatsLeft = left >= 0 ? left : 0;
+            if (ev.seatsLeft === 0) ev.status = "Full";
+            else if (ev.seatsLeft <= 10 && ev.seatsLeft > 0) ev.status = "Closing Soon";
+            else ev.status = "Open";
+        });
+        saveEventsToLocal();
+    }
+
+    // REGISTRATION FUNCTION
+    function addRegistration(regData) {
+        const event = eventsData.find(e => e.id === regData.eventId);
+        if (!event) return { success: false, message: "Event not found" };
+        if (event.seatsLeft <= 0) return { success: false, message: "Event is full!" };
+        
+        const alreadyRegistered = registrations.some(r => r.studentId === regData.studentId && r.eventId === regData.eventId);
+        if (alreadyRegistered) return { success: false, message: "You have already registered for this event!" };
+        
+        const newReg = {
+            id: nextRegId++,
+            studentName: regData.studentName,
+            studentId: regData.studentId,
+            email: regData.email,
+            phone: regData.phone,
+            faculty: regData.faculty || "General",
+            year: regData.year || "1st Year",
+            eventId: event.id,
+            eventName: event.name,
+            registeredAt: new Date().toISOString().slice(0,10)
+        };
+        registrations.push(newReg);
+        saveRegistrations();
+        return { success: true, message: `✅ Successfully registered for ${event.name}!`, registration: newReg };
+    }
+
+    // Admin event CRUD
+    function addEvent(eventData) {
+        const newId = `ev${nextEventId++}`;
+        const newEvent = { id: newId, ...eventData, seatsLeft: eventData.seatsTotal, status: "Open" };
+        eventsData.push(newEvent);
+        saveEventsToLocal();
+        recalcSeatsFromRegistrations();
+        showToast("Event added successfully!");
+        if (currentView === "admin" && isAdminLoggedIn) renderAdminDashboard();
+        else renderHomePage();
+    }
+    
+    function deleteEvent(eventId) {
+        if (registrations.some(r => r.eventId === eventId)) {
+            showToast("Cannot delete: registrations exist for this event.");
+            return false;
+        }
+        eventsData = eventsData.filter(e => e.id !== eventId);
+        saveEventsToLocal();
+        showToast("Event deleted.");
+        if (currentView === "admin" && isAdminLoggedIn) renderAdminDashboard();
+        else renderHomePage();
+        return true;
+    }
+    
+    function addUser(userData) {
+        const newId = `u${nextUserId++}`;
+        const newUser = { id: newId, ...userData, password: userData.password || "default123" };
+        systemUsers.push(newUser);
+        saveUsersToLocal();
+        showToast(`User ${userData.name} added.`);
+        if (currentView === "admin" && isAdminLoggedIn) renderAdminDashboard();
+    }
+    
+    function deleteUser(userId) {
+        systemUsers = systemUsers.filter(u => u.id !== userId);
+        saveUsersToLocal();
+        showToast("User deleted.");
+        if (currentView === "admin" && isAdminLoggedIn) renderAdminDashboard();
+    }
+    
+    function deleteRegistration(regId) {
+        registrations = registrations.filter(r => r.id !== regId);
+        saveRegistrations();
+        showToast("Registration removed.");
+        if (currentView === "admin" && isAdminLoggedIn) renderAdminDashboard();
+    }
+
+    function showToast(msg, isError = false) {
+        let toast = document.createElement("div");
+        toast.className = "toast-notify";
+        toast.style.background = isError ? "var(--danger)" : "var(--navy)";
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function getEventById(id) { return eventsData.find(e => e.id === id); }
+
+    // AUTHENTICATION FUNCTIONS - FIXED
+    function validateAdminCredentials(email, password) {
+        // First check against hardcoded default admin
+        if (email === DEFAULT_ADMIN_EMAIL && password === DEFAULT_ADMIN_PASSWORD) {
+            return true;
+        }
+        // Then check against system users (for any additional admins created)
+        const adminUser = systemUsers.find(u => u.email === email && u.role === "admin" && u.password === password);
+        return !!adminUser;
+    }
+    
+    function showLoginModal() {
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.id = "loginModal";
+        modal.innerHTML = `
+            <div class="modal-content">
+                <i class="fas fa-lock" style="font-size: 2.5rem; color: var(--gold); margin-bottom: 1rem;"></i>
+                <h3>Admin Authentication Required</h3>
+                <p style="margin: 0.5rem 0; color: #666;">Please enter your credentials to access the Admin Dashboard.</p>
+                <div class="login-input">
+                    <input type="email" id="loginEmail" placeholder="Email Address" style="width: 100%;" autocomplete="off" value="admin@iuk.ac.ke">
+                </div>
+                <div class="login-input">
+                    <input type="password" id="loginPassword" placeholder="Password" style="width: 100%;" value="admin123">
+                </div>
+                <button class="login-btn" id="submitLoginBtn"><i class="fas fa-sign-in-alt"></i> Login as Admin</button>
+                <p style="margin-top: 1rem; font-size: 0.8rem; color: #d4af37;">Default: admin@iuk.ac.ke / admin123</p>
+                <button id="closeModalBtn" style="margin-top: 0.8rem; background: none; border: none; color: #999; cursor: pointer;">Cancel</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        document.getElementById("submitLoginBtn").addEventListener("click", () => {
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+            
+            // Validate credentials are not empty
+            if (!email || !password) {
+                showToast("Please enter both email and password", true);
+                return;
+            }
+            
+            if (validateAdminCredentials(email, password)) {
+                isAdminLoggedIn = true;
+                localStorage.setItem("adminAuth", "true");
+                localStorage.setItem("adminEmail", email);
+                showToast("Welcome, Admin! Access granted.");
+                document.getElementById("loginModal").remove();
+                updateUIForAuth();
+                route("admin");
+            } else {
+                showToast("Invalid admin credentials. Access denied. Use admin@iuk.ac.ke / admin123", true);
+            }
+        });
+        document.getElementById("closeModalBtn").addEventListener("click", () => {
+            document.getElementById("loginModal").remove();
+        });
+        modal.addEventListener("click", (e) => { if(e.target === modal) modal.remove(); });
+    }
+    
+    function logoutAdmin() {
+        isAdminLoggedIn = false;
+        localStorage.removeItem("adminAuth");
+        localStorage.removeItem("adminEmail");
+        showToast("Logged out successfully.");
+        updateUIForAuth();
+        route("home");
+    }
+    
+    function updateUIForAuth() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (isAdminLoggedIn) {
+            logoutBtn.style.display = "block";
+        } else {
+            logoutBtn.style.display = "none";
+        }
+    }
+    
+    function checkAdminAuth() {
+        const storedAuth = localStorage.getItem("adminAuth");
+        if (storedAuth === "true") {
+            // Verify stored session is still valid
+            const storedEmail = localStorage.getItem("adminEmail");
+            if (storedEmail && validateAdminCredentials(storedEmail, DEFAULT_ADMIN_PASSWORD)) {
+                isAdminLoggedIn = true;
+            } else {
+                // Invalid stored session, clear it
+                localStorage.removeItem("adminAuth");
+                localStorage.removeItem("adminEmail");
+                isAdminLoggedIn = false;
+            }
+            updateUIForAuth();
+        } else {
+            isAdminLoggedIn = false;
+            updateUIForAuth();
+        }
+    }
+    
+    // RENDER HOME
+    let currentView = "home";
+    let selectedEventId = null;
+
+    function renderHomePage(filterCategory = "all", searchTerm = "") {
+        const container = document.getElementById("app-root");
+        let filtered = [...eventsData];
+        if (filterCategory !== "all") filtered = filtered.filter(ev => ev.category === filterCategory);
+        if (searchTerm.trim() !== "") {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter(ev => ev.name.toLowerCase().includes(term) || ev.description.toLowerCase().includes(term));
+        }
+        const categories = ["all", "Workshop", "Conference", "Sports", "Cultural", "Academic"];
+        container.innerHTML = `
+            <div class="filters">
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search events..." value="${escapeHtml(searchTerm)}"></div>
+                <div class="category-filter">${categories.map(cat => `<div class="filter-chip ${filterCategory === cat ? 'active' : ''}" data-cat="${cat}">${cat === 'all' ? 'All Events' : cat}</div>`).join('')}</div>
+            </div>
+            <div class="events-grid">${filtered.map(ev => `
+                <div class="event-card" data-event-id="${ev.id}">
+                    <div class="card-header">
+                        <span class="event-category">${ev.category}</span>
+                        <span class="status-badge status-${ev.status === 'Open' ? 'open' : (ev.status === 'Closing Soon' ? 'closing' : 'full')}">${ev.status}</span>
+                    </div>
+                    <div class="event-title">${escapeHtml(ev.name)}</div>
+                    <div class="event-detail-row"><i class="fas fa-calendar-alt"></i> ${ev.date} | ${ev.time}</div>
+                    <div class="event-detail-row"><i class="fas fa-map-marker-alt"></i> ${ev.location}</div>
+                    <div class="seats"><i class="fas fa-users"></i> Seats left: ${ev.seatsLeft} / ${ev.seatsTotal}</div>
+                    <button class="btn-reg register-btn" data-id="${ev.id}"><i class="fas fa-ticket-alt"></i> Register Now</button>
+                </div>
+            `).join('')}</div>
+            ${filtered.length === 0 ? '<div style="text-align:center; padding:3rem;">No events found matching your criteria.</div>' : ''}
+        `;
+        document.querySelectorAll(".filter-chip").forEach(chip => chip.addEventListener("click", (e) => { renderHomePage(chip.getAttribute("data-cat"), document.getElementById("searchInput").value); }));
+        document.getElementById("searchInput").addEventListener("input", (e) => renderHomePage(filterCategory, e.target.value));
+        
+        document.querySelectorAll(".register-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const evId = btn.getAttribute("data-id");
+                selectedEventId = evId;
+                currentView = "registration";
+                renderRegistrationPage(evId);
+                updateNavActive("registration");
+            });
+        });
+        
+        document.querySelectorAll(".event-card").forEach(card => {
+            card.addEventListener("click", (e) => {
+                if(e.target.classList.contains("register-btn")) return;
+                const evId = card.getAttribute("data-event-id");
+                if(evId) {
+                    selectedEventId = evId;
+                    currentView = "detail";
+                    renderEventDetail(evId);
+                    updateNavActive("detail");
+                }
+            });
+        });
+    }
+    
+    function renderEventDetail(eventId) {
+        const ev = getEventById(eventId);
+        if (!ev) return renderHomePage();
+        const container = document.getElementById("app-root");
+        container.innerHTML = `
+            <button class="back-link" id="backHomeBtn"><i class="fas fa-arrow-left"></i> Back to Events</button>
+            <div class="detail-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;"><h1 style="color:var(--navy);">${escapeHtml(ev.name)}</h1><span class="status-badge status-${ev.status === 'Open' ? 'open' : (ev.status === 'Closing Soon' ? 'closing' : 'full')}">${ev.status}</span></div>
+                <p><i class="fas fa-calendar"></i> <strong>Date:</strong> ${ev.date} | ${ev.time}</p>
+                <p><i class="fas fa-map-pin"></i> <strong>Location:</strong> ${ev.location} &nbsp;| <i class="fas fa-tag"></i> ${ev.category}</p>
+                <p><strong>📖 Description:</strong> ${escapeHtml(ev.description)}</p>
+                <p><strong>🎤 Speaker/Organizer:</strong> ${escapeHtml(ev.speaker)}</p>
+                <p><strong>📅 Schedule/Agenda:</strong> ${escapeHtml(ev.agenda)}</p>
+                <div class="venue-map-placeholder"><i class="fas fa-map"></i> 🗺️ Venue Map: ${ev.venueMap} (interactive map placeholder)</div>
+                <p><strong>Remaining Seats:</strong> ${ev.seatsLeft} / ${ev.seatsTotal}</p>
+                <button class="btn-reg" id="detailRegBtn" style="width:auto; padding:0.7rem 2rem;"><i class="fas fa-ticket-alt"></i> Register for this event</button>
+            </div>
+        `;
+        document.getElementById("backHomeBtn").addEventListener("click", () => { currentView = "home"; renderHomePage(); updateNavActive("home"); });
+        document.getElementById("detailRegBtn").addEventListener("click", () => { selectedEventId = ev.id; currentView = "registration"; renderRegistrationPage(ev.id); updateNavActive("registration"); });
+    }
+
+    function renderRegistrationPage(eventId) {
+        const ev = getEventById(eventId);
+        if (!ev) return renderHomePage();
+        const container = document.getElementById("app-root");
+        container.innerHTML = `
+            <button class="back-link" id="backFromReg"><i class="fas fa-arrow-left"></i> Back to Event Details</button>
+            <div class="detail-card" style="max-width:720px; margin:0 auto;">
+                <h2><i class="fas fa-edit"></i> Event Registration Form</h2>
+                <div style="background: var(--gray-light); padding: 1rem; border-radius: 1rem; margin: 1rem 0;">
+                    <p><strong>🎯 Event:</strong> ${escapeHtml(ev.name)}</p>
+                    <p><strong>📅 Date:</strong> ${ev.date} | <strong>📍 Location:</strong> ${ev.location}</p>
+                    <p><strong>🎫 Seats Available:</strong> ${ev.seatsLeft} / ${ev.seatsTotal}</p>
+                </div>
+                <form id="registrationForm">
+                    <div class="form-group"><label><i class="fas fa-user"></i> Full Name *</label><input type="text" id="regName" placeholder="Enter your full name" required></div>
+                    <div class="form-group"><label><i class="fas fa-id-card"></i> Student ID *</label><input type="text" id="regStudentId" placeholder="e.g., S12345" required></div>
+                    <div class="form-group"><label><i class="fas fa-envelope"></i> Email Address *</label><input type="email" id="regEmail" placeholder="you@university.edu" required></div>
+                    <div class="form-group"><label><i class="fas fa-phone"></i> Phone Number *</label><input type="tel" id="regPhone" placeholder="+254 700 000000" required></div>
+                    <div class="form-group"><label><i class="fas fa-building"></i> Faculty/Department</label><input type="text" id="regFaculty" placeholder="e.g., Engineering, Business"></div>
+                    <div class="form-group"><label><i class="fas fa-graduation-cap"></i> Year of Study</label><select id="regYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>Graduate</option></select></div>
+                    <input type="hidden" id="regEventId" value="${ev.id}">
+                    <button type="submit" class="btn-reg" style="background: var(--gold); color: var(--navy); font-size: 1.1rem;"><i class="fas fa-check-circle"></i> Complete Registration</button>
+                </form>
+                <div id="formErrors" style="color: var(--danger); margin-top: 1rem; text-align: center;"></div>
+            </div>
+        `;
+        document.getElementById("backFromReg").addEventListener("click", () => { currentView = "detail"; renderEventDetail(eventId); updateNavActive("detail"); });
+        document.getElementById("registrationForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const name = document.getElementById("regName").value.trim();
+            const sid = document.getElementById("regStudentId").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
+            const phone = document.getElementById("regPhone").value.trim();
+            if (!name || !sid || !email || !phone) {
+                document.getElementById("formErrors").innerHTML = "⚠️ Please fill all required fields (*).";
+                return;
+            }
+            if (!email.includes("@") || !email.includes(".")) {
+                document.getElementById("formErrors").innerHTML = "⚠️ Please enter a valid email address.";
+                return;
+            }
+            if (ev.seatsLeft <= 0) {
+                showToast("Sorry, this event is full!", true);
+                renderHomePage();
+                currentView = "home";
+                updateNavActive("home");
+                return;
+            }
+            const result = addRegistration({ 
+                studentName: name, studentId: sid, email, phone, 
+                faculty: document.getElementById("regFaculty").value || "General", 
+                year: document.getElementById("regYear").value, 
+                eventId: ev.id 
+            });
+            if (result.success) {
+                container.innerHTML = `
+                    <div class="detail-card" style="text-align: center; max-width: 600px; margin: 0 auto;">
+                        <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin-bottom: 1rem;"></i>
+                        <h2 style="color: var(--navy);">Registration Confirmed!</h2>
+                        <p>You are successfully registered for <strong>${escapeHtml(ev.name)}</strong>.</p>
+                        <div style="background: var(--gray-light); padding: 1rem; border-radius: 1rem; margin: 1rem 0; text-align: left;">
+                            <p><strong>📧 Confirmation sent to:</strong> ${email}</p>
+                            <p><strong>🆔 Registration ID:</strong> REG-${result.registration.id}</p>
+                            <p><strong>📅 Event Date:</strong> ${ev.date}</p>
+                        </div>
+                        <button class="btn-reg" id="confHomeBtn" style="background: var(--deep-blue);"><i class="fas fa-home"></i> Return to Events</button>
+                    </div>
+                `;
+                document.getElementById("confHomeBtn").addEventListener("click", () => { currentView = "home"; renderHomePage(); updateNavActive("home"); });
+            } else {
+                document.getElementById("formErrors").innerHTML = `⚠️ ${result.message}`;
+            }
+        });
+    }
+
+    // ADMIN DASHBOARD
+    function renderAdminDashboard() {
+        if (!isAdminLoggedIn) {
+            showLoginModal();
+            return;
+        }
+        const container = document.getElementById("app-root");
+        const totalReg = registrations.length;
+        const eventsWithRegCount = eventsData.map(ev => ({ name: ev.name, count: registrations.filter(r => r.eventId === ev.id).length }));
+        const recent = [...registrations].reverse().slice(0, 6);
+        
+        container.innerHTML = `
+            <div><h2><i class="fas fa-chalkboard-user"></i> Admin Dashboard</h2><p>Manage events, users & registrations</p></div>
+            <div class="admin-stats"><div class="stat-card"><div class="stat-number">${totalReg}</div><div>Total Registrations</div></div><div class="stat-card"><div class="stat-number">${eventsData.length}</div><div>Active Events</div></div><div class="stat-card"><div class="stat-number">${systemUsers.length}</div><div>System Users</div></div></div>
+            
+            <div class="admin-section"><h3><i class="fas fa-user-plus"></i> Admin Quick Registration</h3><div class="inline-form"><div class="form-group"><input type="text" id="adminRegName" placeholder="Student Full Name *"></div><div class="form-group"><input type="text" id="adminRegStudentId" placeholder="Student ID *"></div><div class="form-group"><input type="email" id="adminRegEmail" placeholder="Email *"></div><div class="form-group"><input type="tel" id="adminRegPhone" placeholder="Phone"></div><div class="form-group"><select id="adminRegEventId">${eventsData.map(e => `<option value="${e.id}" ${e.seatsLeft <= 0 ? 'disabled' : ''}>${e.name} (${e.seatsLeft} seats left)</option>`).join('')}</select></div><button id="adminRegBtn" class="btn-admin-action" style="background: var(--gold); color: var(--navy);"><i class="fas fa-check-circle"></i> Register Student</button></div></div>
+            
+            <div class="admin-section"><h3><i class="fas fa-calendar-plus"></i> Manage Events</h3><div class="inline-form"><div class="form-group"><input type="text" id="eventName" placeholder="Event Name"></div><div class="form-group"><input type="text" id="eventDate" placeholder="Date (e.g., May 30, 2026)"></div><div class="form-group"><input type="text" id="eventLocation" placeholder="Location"></div><div class="form-group"><select id="eventCategory"><option>Workshop</option><option>Conference</option><option>Sports</option><option>Cultural</option><option>Academic</option></select></div><div class="form-group"><input type="number" id="eventSeats" placeholder="Total Seats"></div><button id="addEventBtn" class="btn-admin-action"><i class="fas fa-plus"></i> Add Event</button></div><div id="eventsListAdmin" style="margin-top:1rem;">${eventsData.map(ev => `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:8px;"><span><strong>${ev.name}</strong> (${ev.category}) - Seats: ${ev.seatsLeft}/${ev.seatsTotal}</span><div><button class="icon-btn delete" data-id="${ev.id}" data-type="event"><i class="fas fa-trash-alt"></i></button></div></div>`).join('')}</div></div>
+            
+            <div class="admin-section"><h3><i class="fas fa-users"></i> Manage Users</h3><div class="inline-form"><div class="form-group"><input type="text" id="userName" placeholder="Full Name"></div><div class="form-group"><input type="email" id="userEmail" placeholder="Email"></div><div class="form-group"><input type="text" id="userStudentId" placeholder="Student ID"></div><div class="form-group"><select id="userRole"><option>student</option><option>admin</option></select></div><div class="form-group"><input type="password" id="userPassword" placeholder="Password"></div><button id="addUserBtn" class="btn-admin-action"><i class="fas fa-user-plus"></i> Add User</button></div><div id="usersListAdmin" style="margin-top:1rem;">${systemUsers.map(u => `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:8px;"><span><strong>${u.name}</strong> (${u.email}) - ${u.role}</span><button class="icon-btn delete" data-id="${u.id}" data-type="user"><i class="fas fa-trash-alt"></i></button></div>`).join('')}</div></div>
+            
+            <div style="background:white; border-radius:1rem; padding:1rem; margin:1rem 0;"><canvas id="regChart" width="400" height="200"></canvas></div>
+            <div class="recent-table"><h3><i class="fas fa-history"></i> Recent Sign-ups</h3><table><thead><tr><th>Name</th><th>Student ID</th><th>Event</th><th>Date</th><th>Action</th></tr></thead><tbody>${recent.map(r => `</tr><td>${escapeHtml(r.studentName)}</td><td>${escapeHtml(r.studentId)}</td><td>${escapeHtml(r.eventName)}</td><td>${r.registeredAt}</td><td><button class="icon-btn delete" data-regid="${r.id}" data-type="registration"><i class="fas fa-trash"></i></button></td>`).join('')}</tbody></table></div>
+            <button class="btn-export" id="exportCSVBtn"><i class="fas fa-download"></i> Export Registrations CSV</button>
+        `;
+        
+        new Chart(document.getElementById("regChart").getContext("2d"), { type: 'bar', data: { labels: eventsWithRegCount.map(e=>e.name.length>18? e.name.slice(0,15)+'..':e.name), datasets: [{ label: 'Registrations', data: eventsWithRegCount.map(e=>e.count), backgroundColor: '#d4af37', borderRadius: 8 }] } });
+        
+        document.getElementById("addEventBtn").addEventListener("click", () => {
+            const name = document.getElementById("eventName").value.trim();
+            if(!name) return showToast("Event name required", true);
+            addEvent({ name, date: document.getElementById("eventDate").value || "TBD", time: "9:00 AM", location: document.getElementById("eventLocation").value || "Campus", category: document.getElementById("eventCategory").value, seatsTotal: parseInt(document.getElementById("eventSeats").value) || 50, description: "New event", speaker: "TBA", agenda: "TBA", venueMap: "Main Hall" });
+            renderAdminDashboard();
+        });
+        document.getElementById("addUserBtn").addEventListener("click", () => {
+            const name = document.getElementById("userName").value.trim();
+            if(!name) return showToast("Name required", true);
+            addUser({ name, email: document.getElementById("userEmail").value, studentId: document.getElementById("userStudentId").value, role: document.getElementById("userRole").value, password: document.getElementById("userPassword").value || "default123" });
+            renderAdminDashboard();
+        });
+        
+        document.getElementById("adminRegBtn").addEventListener("click", () => {
+            const studentName = document.getElementById("adminRegName").value.trim();
+            const studentId = document.getElementById("adminRegStudentId").value.trim();
+            const email = document.getElementById("adminRegEmail").value.trim();
+            const phone = document.getElementById("adminRegPhone").value.trim() || "Admin Registered";
+            const eventId = document.getElementById("adminRegEventId").value;
+            if(!studentName || !studentId || !email) {
+                showToast("Please fill Name, Student ID and Email", true);
+                return;
+            }
+            if(!email.includes("@")) {
+                showToast("Valid email required", true);
+                return;
+            }
+            const ev = eventsData.find(e=>e.id === eventId);
+            if(!ev) return showToast("Event not found", true);
+            if(ev.seatsLeft <= 0) return showToast("Event is full! Cannot register.", true);
+            const result = addRegistration({ studentName, studentId, email, phone, faculty: "Admin Registration", year: "Via Admin", eventId });
+            if(result.success) {
+                showToast(result.message);
+                document.getElementById("adminRegName").value = "";
+                document.getElementById("adminRegStudentId").value = "";
+                document.getElementById("adminRegEmail").value = "";
+                document.getElementById("adminRegPhone").value = "";
+                renderAdminDashboard();
+            } else {
+                showToast(result.message, true);
+            }
+        });
+        
+        document.querySelectorAll(".icon-btn.delete").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const type = btn.getAttribute("data-type");
+                const id = btn.getAttribute("data-id") || btn.getAttribute("data-regid");
+                if(type === "event") deleteEvent(id);
+                else if(type === "user") deleteUser(id);
+                else if(type === "registration") { deleteRegistration(parseInt(id)); renderAdminDashboard(); }
+            });
+        });
+        document.getElementById("exportCSVBtn").addEventListener("click", () => {
+            let csvRows = [["ID","Name","StudentID","Email","Phone","Event","Date"]];
+            registrations.forEach(r => csvRows.push([r.id, r.studentName, r.studentId, r.email, r.phone || "", r.eventName, r.registeredAt]));
+            const csv = csvRows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+            const blob = new Blob([csv], {type:"text/csv"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "uni_registrations.csv"; link.click();
+        });
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function updateNavActive(page) { document.querySelectorAll(".nav-link").forEach(btn => btn.classList.remove("active")); if(page==="home") document.querySelector(".nav-link[data-page='home']").classList.add("active"); else if(page==="admin") document.querySelector(".nav-link[data-page='admin']").classList.add("active"); }
+    
+    function route(page) { 
+        if(page === "home") { 
+            currentView = "home"; 
+            renderHomePage(); 
+            updateNavActive("home"); 
+        } else if(page === "admin") { 
+            if(isAdminLoggedIn) {
+                currentView = "admin"; 
+                renderAdminDashboard(); 
+                updateNavActive("admin");
+            } else {
+                showLoginModal();
+            }
+        } 
+    }
+    
+    // Initialize
+    loadData();
+    checkAdminAuth();
+    document.querySelectorAll(".nav-link").forEach(btn => btn.addEventListener("click", (e) => route(btn.getAttribute("data-page"))));
+    document.getElementById("logoutBtn").addEventListener("click", () => logoutAdmin());
+    route("home");
+</script>
+</body>
+</html>
